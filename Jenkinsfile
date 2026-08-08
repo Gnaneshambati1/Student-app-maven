@@ -10,6 +10,12 @@ pipeline {
             }
         }
 
+        stage('Publish Test Results') {
+            steps {
+                junit 'target/surefire-reports/*.xml'
+            }
+        }
+
         stage('Verify Artifact') {
             steps {
                 sh 'ls -lh target/*.jar'
@@ -30,7 +36,7 @@ pipeline {
         }
 
         success {
-            echo 'SUCCESS: Build and artifact archiving completed.'
+            echo 'SUCCESS: Build, tests and artifact archiving completed.'
         }
 
         failure {
