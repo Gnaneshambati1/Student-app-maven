@@ -1,72 +1,40 @@
 pipeline {
     agent any
 
-    parameters {
-        choice(
-            name: 'ENVIRONMENT',
-            choices: ['development', 'testing', 'production'],
-            description: 'Select the environment'
-        )
-    }
-
     stages {
-
-        stage('Show Environment') {
-            steps {
-                echo "Selected Environment: ${params.ENVIRONMENT}"
-            }
-        }
 
         stage('Build') {
             steps {
+                echo 'Building application...'
                 sh 'mvn clean package'
             }
         }
 
-        stage('Development Test') {
-            when {
-                expression {
-                    params.ENVIRONMENT == 'development'
-                }
-            }
-
+        stage('Verify Artifact') {
             steps {
-                echo 'Running development testing...'
+                sh 'ls -lh target/*.jar'
             }
         }
 
-        stage('Testing Validation') {
-            when {
-                expression {
-                    params.ENVIRONMENT == 'testing'
-                }
-            }
-
+        stage('Archive Artifact') {
             steps {
-                echo 'Running testing environment validation...'
-            }
-        }
-
-        stage('Production Validation') {
-            when {
-                expression {
-                    params.ENVIRONMENT == 'production'
-                }
-            }
-
-            steps {
-                echo 'Running production validation...'
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
     }
 
     post {
+
+        always {
+            echo 'Pipeline execution finished.'
+        }
+
         success {
-            echo 'Pipeline completed successfully'
+            echo 'SUCCESS: Build and artifact archiving completed.'
         }
 
         failure {
-            echo 'Pipeline failed'
+            echo 'FAILURE: Pipeline failed.'
         }
     }
 }
