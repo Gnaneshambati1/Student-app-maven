@@ -1,15 +1,18 @@
 pipeline {
-
     agent any
+
+    environment {
+        APP_NAME = 'student-app'
+        BUILD_ENV = 'development'
+    }
 
     stages {
 
-        stage('Verify Workspace') {
+        stage('Verify Environment') {
             steps {
-                sh '''
-                pwd
-                ls -la
-                '''
+                echo "Application: ${APP_NAME}"
+                echo "Environment: ${BUILD_ENV}"
+                echo "Jenkins Build Number: ${BUILD_NUMBER}"
             }
         }
 
@@ -18,13 +21,15 @@ pipeline {
                 sh 'mvn clean package'
             }
         }
-
-        stage('Verify Artifact') {
-            steps {
-                sh 'ls -la target'
-            }
-        }
-
     }
 
+    post {
+        success {
+            echo "Pipeline completed successfully"
+        }
+
+        failure {
+            echo "Pipeline failed"
+        }
+    }
 }
