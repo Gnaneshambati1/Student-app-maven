@@ -5,29 +5,15 @@ pipeline {
         choice(
             name: 'ENVIRONMENT',
             choices: ['development', 'testing', 'production'],
-            description: 'Select the deployment environment'
-        )
-
-        string(
-            name: 'APP_VERSION',
-            defaultValue: '1.0',
-            description: 'Enter application version'
-        )
-
-        booleanParam(
-            name: 'RUN_TESTS',
-            defaultValue: true,
-            description: 'Run unit tests?'
+            description: 'Select the environment'
         )
     }
 
     stages {
 
-        stage('Show Parameters') {
+        stage('Show Environment') {
             steps {
-                echo "Environment: ${params.ENVIRONMENT}"
-                echo "Application Version: ${params.APP_VERSION}"
-                echo "Run Tests: ${params.RUN_TESTS}"
+                echo "Selected Environment: ${params.ENVIRONMENT}"
             }
         }
 
@@ -36,15 +22,51 @@ pipeline {
                 sh 'mvn clean package'
             }
         }
+
+        stage('Development Test') {
+            when {
+                expression {
+                    params.ENVIRONMENT == 'development'
+                }
+            }
+
+            steps {
+                echo 'Running development testing...'
+            }
+        }
+
+        stage('Testing Validation') {
+            when {
+                expression {
+                    params.ENVIRONMENT == 'testing'
+                }
+            }
+
+            steps {
+                echo 'Running testing environment validation...'
+            }
+        }
+
+        stage('Production Validation') {
+            when {
+                expression {
+                    params.ENVIRONMENT == 'production'
+                }
+            }
+
+            steps {
+                echo 'Running production validation...'
+            }
+        }
     }
 
     post {
         success {
-            echo "Pipeline completed successfully"
+            echo 'Pipeline completed successfully'
         }
 
         failure {
-            echo "Pipeline failed"
+            echo 'Pipeline failed'
         }
     }
 }
