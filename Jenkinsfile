@@ -3,44 +3,40 @@ pipeline {
 
     stages {
 
+        stage('Test Credential') {
+            steps {
+                withCredentials([
+                    string(
+                        credentialsId: 'cicd-lab-secret',
+                        variable: 'MY_SECRET'
+                    )
+                ]) {
+                    sh '''
+                        echo "Credential is available to the pipeline"
+                        echo "Secret length: ${#MY_SECRET}"
+                    '''
+                }
+            }
+        }
+
         stage('Build') {
             steps {
-                echo 'Building application...'
                 sh 'mvn clean package'
-            }
-        }
-
-        stage('Publish Test Results') {
-            steps {
-                junit 'target/surefire-reports/*.xml'
-            }
-        }
-
-        stage('Verify Artifact') {
-            steps {
-                sh 'ls -lh target/*.jar'
-            }
-        }
-
-        stage('Archive Artifact') {
-            steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
     }
 
     post {
-
         always {
             echo 'Pipeline execution finished.'
         }
 
         success {
-            echo 'SUCCESS: Build, tests and artifact archiving completed.'
+            echo 'Pipeline completed successfully.'
         }
 
         failure {
-            echo 'FAILURE: Pipeline failed.'
+            echo 'Pipeline failed.'
         }
     }
 }
